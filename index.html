@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WeatherVerse – 3D Weather App</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+  <!-- Animated Background Particles -->
+  <div class="bg-scene">
+    <div class="particle-container" id="particles"></div>
+    <div class="bg-gradient-orb orb1"></div>
+    <div class="bg-gradient-orb orb2"></div>
+    <div class="bg-gradient-orb orb3"></div>
+    <div class="floating-clouds">
+      <div class="cloud cloud1"></div>
+      <div class="cloud cloud2"></div>
+      <div class="cloud cloud3"></div>
+    </div>
+  </div>
+
+  <!-- Main App Container -->
+  <div class="app-wrapper">
+
+    <!-- Header / Navbar -->
+    <header class="app-header">
+      <div class="logo-wrap">
+        <div class="logo-icon">
+          <i class="fas fa-globe-americas"></i>
+        </div>
+        <span class="logo-text">WeatherVerse</span>
+      </div>
+      <div class="header-actions">
+        <button class="unit-toggle" id="unitToggle" title="Toggle °C / °F">
+          <span id="unitLabel">°C</span>
+        </button>
+        <button class="sound-btn" id="soundBtn" title="Toggle Voice Announcement">
+          <i class="fas fa-volume-high"></i>
+        </button>
+        <button class="infographic-btn" id="infographicBtn" title="Infographic / Broadcast Mode">
+          <i class="fas fa-tv"></i>
+          <span>Infographic</span>
+        </button>
+        <button class="gps-btn" id="gpsBtn" title="Use My Location">
+          <i class="fas fa-location-crosshairs"></i>
+          <span>GPS</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Search Bar -->
+    <section class="search-section">
+      <div class="search-box-3d">
+        <div class="search-inner">
+          <i class="fas fa-search search-icon"></i>
+          <input
+            type="text"
+            id="searchInput"
+            class="search-input"
+            placeholder="Search city, country..."
+            autocomplete="off"
+          />
+          <button class="search-btn" id="searchBtn">
+            <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+        <div class="search-suggestions" id="suggestions"></div>
+      </div>
+    </section>
+
+    <!-- Loading Spinner -->
+    <div class="loader-wrap" id="loader">
+      <div class="loader-3d">
+        <div class="cube">
+          <div class="face front"><i class="fas fa-cloud-sun"></i></div>
+          <div class="face back"><i class="fas fa-snowflake"></i></div>
+          <div class="face right"><i class="fas fa-bolt"></i></div>
+          <div class="face left"><i class="fas fa-cloud-rain"></i></div>
+          <div class="face top"><i class="fas fa-sun"></i></div>
+          <div class="face bottom"><i class="fas fa-wind"></i></div>
+        </div>
+      </div>
+      <p class="loader-text">Fetching weather data...</p>
+    </div>
+
+    <!-- Error Message -->
+    <div class="error-card" id="errorCard">
+      <i class="fas fa-triangle-exclamation"></i>
+      <p id="errorMsg">City not found. Please try again.</p>
+    </div>
+
+    <!-- Main Weather Content -->
+    <main class="weather-content" id="weatherContent">
+
+      <!-- Hero Weather Card -->
+      <div class="hero-card-3d">
+        <div class="hero-card-inner">
+
+          <!-- Location Info -->
+          <div class="location-row">
+            <div class="location-info">
+              <h2 class="city-name" id="cityName">--</h2>
+              <p class="country-name" id="countryName">--</p>
+              <p class="date-time" id="dateTime">--</p>
+            </div>
+            <div class="weather-img-wrap">
+              <img id="weatherImg" src="" alt="Weather" class="weather-hero-img" />
+              <div class="img-glow" id="imgGlow"></div>
+            </div>
+          </div>
+
+          <!-- Temperature Display -->
+          <div class="temp-display">
+            <div class="temp-main">
+              <span class="temp-value" id="tempValue">--</span>
+              <span class="temp-unit" id="tempUnit">°C</span>
+            </div>
+            <div class="feels-like">
+              Feels like <span id="feelsLike">--</span>
+            </div>
+          </div>
+
+          <!-- Weather Description -->
+          <div class="weather-desc-row">
+            <span class="weather-badge" id="weatherDesc">--</span>
+            <div class="min-max">
+              <span><i class="fas fa-arrow-up" style="color:#ff6b6b"></i> <span id="tempMax">--</span></span>
+              <span><i class="fas fa-arrow-down" style="color:#74b9ff"></i> <span id="tempMin">--</span></span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-card" style="--delay:0s">
+          <div class="stat-icon-wrap" style="--color:#74b9ff">
+            <i class="fas fa-droplet"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Humidity</span>
+            <span class="stat-value" id="humidity">--%</span>
+          </div>
+          <div class="stat-bar-wrap">
+            <div class="stat-bar" id="humidityBar"></div>
+          </div>
+        </div>
+
+        <div class="stat-card" style="--delay:0.1s">
+          <div class="stat-icon-wrap" style="--color:#a29bfe">
+            <i class="fas fa-wind"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Wind Speed</span>
+            <span class="stat-value" id="windSpeed">-- km/h</span>
+          </div>
+          <div class="wind-compass">
+            <div class="compass-ring">
+              <div class="compass-needle" id="windNeedle"></div>
+              <span class="compass-dir" id="windDir">--</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card" style="--delay:0.2s">
+          <div class="stat-icon-wrap" style="--color:#fd79a8">
+            <i class="fas fa-eye"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Visibility</span>
+            <span class="stat-value" id="visibility">-- km</span>
+          </div>
+        </div>
+
+        <div class="stat-card" style="--delay:0.3s">
+          <div class="stat-icon-wrap" style="--color:#fdcb6e">
+            <i class="fas fa-gauge-high"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Pressure</span>
+            <span class="stat-value" id="pressure">-- hPa</span>
+          </div>
+        </div>
+
+        <div class="stat-card" style="--delay:0.4s">
+          <div class="stat-icon-wrap" style="--color:#ff7675">
+            <i class="fas fa-sun"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Sunrise</span>
+            <span class="stat-value" id="sunrise">--:--</span>
+          </div>
+        </div>
+
+        <div class="stat-card" style="--delay:0.5s">
+          <div class="stat-icon-wrap" style="--color:#6c5ce7">
+            <i class="fas fa-moon"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Sunset</span>
+            <span class="stat-value" id="sunset">--:--</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- UV Index + Air Quality Row -->
+      <div class="extra-row">
+        <div class="uv-card">
+          <div class="uv-header">
+            <i class="fas fa-radiation"></i>
+            <span>UV Index</span>
+          </div>
+          <div class="uv-meter">
+            <div class="uv-track">
+              <div class="uv-fill" id="uvFill"></div>
+              <div class="uv-thumb" id="uvThumb"></div>
+            </div>
+            <div class="uv-labels">
+              <span>Low</span><span>Moderate</span><span>High</span><span>Extreme</span>
+            </div>
+          </div>
+          <span class="uv-value" id="uvValue">--</span>
+        </div>
+
+        <div class="cloud-card">
+          <div class="cloud-header">
+            <i class="fas fa-cloud"></i>
+            <span>Cloud Cover</span>
+          </div>
+          <div class="cloud-visual">
+            <div class="cloud-sky" id="cloudSky">
+              <div class="cloud-fill" id="cloudFill"></div>
+            </div>
+          </div>
+          <span class="cloud-pct" id="cloudPct">--%</span>
+        </div>
+      </div>
+
+      <!-- 5-Day Forecast -->
+      <div class="forecast-section">
+        <h3 class="section-title">
+          <i class="fas fa-calendar-days"></i>
+          5-Day Forecast
+        </h3>
+        <div class="forecast-scroll">
+          <div class="forecast-cards" id="forecastCards">
+            <!-- Dynamically filled -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Hourly Forecast -->
+      <div class="hourly-section">
+        <h3 class="section-title">
+          <i class="fas fa-clock"></i>
+          24-Hour Forecast
+        </h3>
+        <div class="hourly-scroll">
+          <div class="hourly-cards" id="hourlyCards">
+            <!-- Dynamically filled -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Weather Map Placeholder -->
+      <div class="map-section">
+        <h3 class="section-title">
+          <i class="fas fa-map-location-dot"></i>
+          Location Map
+        </h3>
+        <div class="map-container" id="mapContainer">
+          <iframe
+            id="mapFrame"
+            class="map-frame"
+            frameborder="0"
+            allowfullscreen
+            loading="lazy"
+            src=""
+          ></iframe>
+          <div class="map-overlay">
+            <div class="map-pin">
+              <i class="fas fa-location-pin"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- =============================================
+         INFOGRAPHIC / BROADCAST MODE PANEL
+         ============================================= -->
+    <div class="infographic-overlay" id="infographicOverlay">
+
+      <!-- Close Button -->
+      <button class="ig-close-btn" id="igCloseBtn">
+        <i class="fas fa-xmark"></i>
+      </button>
+
+      <!-- Tab Switcher -->
+      <div class="ig-tabs">
+        <button class="ig-tab active" data-tab="current">
+          <i class="fas fa-cloud-sun"></i> Current
+        </button>
+        <button class="ig-tab" data-tab="daily">
+          <i class="fas fa-calendar-day"></i> Daily
+        </button>
+        <button class="ig-tab" data-tab="weekly">
+          <i class="fas fa-calendar-week"></i> Weekly
+        </button>
+      </div>
+
+      <!-- ── TAB 1: CURRENT CONDITIONS ── -->
+      <div class="ig-panel active" id="igPanelCurrent">
+
+        <!-- Broadcast lower-third ticker -->
+        <div class="ig-ticker">
+          <div class="ig-ticker-label"><i class="fas fa-satellite-dish"></i> LIVE</div>
+          <div class="ig-ticker-track">
+            <span class="ig-ticker-text" id="igTickerText">Loading weather data...</span>
+          </div>
+        </div>
+
+        <div class="ig-current-grid">
+
+          <!-- Big Hero Block -->
+          <div class="ig-hero-block">
+            <div class="ig-location-badge">
+              <i class="fas fa-location-dot"></i>
+              <span id="igCity">--</span>
+              <span class="ig-country-badge" id="igCountry">--</span>
+            </div>
+            <div class="ig-date-row" id="igDate">--</div>
+
+            <div class="ig-big-icon-wrap">
+              <div class="ig-icon-ring"></div>
+              <div class="ig-icon-ring ig-ring2"></div>
+              <img id="igHeroImg" src="" alt="" class="ig-big-icon" />
+            </div>
+
+            <div class="ig-temp-block">
+              <span class="ig-temp-val" id="igTemp">--</span>
+              <span class="ig-temp-sym" id="igTempSym">°C</span>
+            </div>
+            <div class="ig-condition" id="igCondition">--</div>
+          </div>
+
+          <!-- Side Stats Panel -->
+          <div class="ig-side-stats">
+
+            <div class="ig-stat-row" style="--si:0">
+              <div class="ig-stat-icon-box" style="--sc:#74b9ff">
+                <i class="fas fa-temperature-half"></i>
+              </div>
+              <div class="ig-stat-texts">
+                <span class="ig-stat-name">Feels Like</span>
+                <span class="ig-stat-num" id="igFeels">--</span>
+              </div>
+              <div class="ig-stat-bar-col">
+                <div class="ig-mini-bar" id="igFeelsBar"></div>
+              </div>
+            </div>
+
+            <div class="ig-stat-row" style="--si:1">
+              <div class="ig-stat-icon-box" style="--sc:#a29bfe">
+                <i class="fas fa-droplet"></i>
+              </div>
+              <div class="ig-stat-texts">
+                <span class="ig-stat-name">Humidity</span>
+                <span class="ig-stat-num" id="igHumidity">--%</span>
+              </div>
+              <div class="ig-stat-bar-col">
+                <div class="ig-mini-bar" id="igHumidityBar"></div>
+              </div>
+            </div>
+
+            <div class="ig-stat-row" style="--si:2">
+              <div class="ig-stat-icon-box" style="--sc:#55efc4">
+                <i class="fas fa-wind"></i>
+              </div>
+              <div class="ig-stat-texts">
+                <span class="ig-stat-name">Wind</span>
+                <span class="ig-stat-num" id="igWind">--</span>
+              </div>
+              <div class="ig-stat-bar-col">
+                <div class="ig-mini-bar" id="igWindBar"></div>
+              </div>
+            </div>
+
+            <div class="ig-stat-row" style="--si:3">
+              <div class="ig-stat-icon-box" style="--sc:#fdcb6e">
+                <i class="fas fa-gauge-high"></i>
+              </div>
+              <div class="ig-stat-texts">
+                <span class="ig-stat-name">Pressure</span>
+                <span class="ig-stat-num" id="igPressure">-- hPa</span>
+              </div>
+              <div class="ig-stat-bar-col">
+                <div class="ig-mini-bar" id="igPressureBar"></div>
+              </div>
+            </div>
+
+            <div class="ig-stat-row" style="--si:4">
+              <div class="ig-stat-icon-box" style="--sc:#fd79a8">
+                <i class="fas fa-eye"></i>
+              </div>
+              <div class="ig-stat-texts">
+                <span class="ig-stat-name">Visibility</span>
+                <span class="ig-stat-num" id="igVis">-- km</span>
+              </div>
+              <div class="ig-stat-bar-col">
+                <div class="ig-mini-bar" id="igVisBar"></div>
+              </div>
+            </div>
+
+            <div class="ig-stat-row" style="--si:5">
+              <div class="ig-stat-icon-box" style="--sc:#ffeaa7">
+                <i class="fas fa-cloud"></i>
+              </div>
+              <div class="ig-stat-texts">
+                <span class="ig-stat-name">Cloud Cover</span>
+                <span class="ig-stat-num" id="igCloud">--%</span>
+              </div>
+              <div class="ig-stat-bar-col">
+                <div class="ig-mini-bar" id="igCloudBar"></div>
+              </div>
+            </div>
+
+          </div><!-- end side stats -->
+
+          <!-- Bottom Sun Timeline -->
+          <div class="ig-sun-row">
+            <div class="ig-sun-item">
+              <div class="ig-sun-icon sunrise"><i class="fas fa-sun"></i></div>
+              <span class="ig-sun-label">Sunrise</span>
+              <span class="ig-sun-time" id="igSunrise">--</span>
+            </div>
+            <div class="ig-sun-arc-wrap">
+              <svg class="ig-sun-arc-svg" viewBox="0 0 300 120">
+                <defs>
+                  <linearGradient id="arcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%"   stop-color="#fdcb6e"/>
+                    <stop offset="50%"  stop-color="#e17055"/>
+                    <stop offset="100%" stop-color="#6c5ce7"/>
+                  </linearGradient>
+                </defs>
+                <path d="M 20 110 Q 150 0 280 110" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+                <path id="igArcPath" d="M 20 110 Q 150 0 280 110" fill="none" stroke="url(#arcGrad)" stroke-width="3" stroke-dasharray="400" stroke-dashoffset="400"/>
+                <circle id="igSunDot" cx="20" cy="110" r="7" fill="#fdcb6e" filter="url(#glow)">
+                  <animate attributeName="r" values="7;9;7" dur="2s" repeatCount="indefinite"/>
+                </circle>
+                <defs>
+                  <filter id="glow">
+                    <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                    <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                  </filter>
+                </defs>
+              </svg>
+            </div>
+            <div class="ig-sun-item right">
+              <div class="ig-sun-icon sunset"><i class="fas fa-moon"></i></div>
+              <span class="ig-sun-label">Sunset</span>
+              <span class="ig-sun-time" id="igSunset">--</span>
+            </div>
+          </div>
+
+        </div><!-- end ig-current-grid -->
+      </div><!-- end igPanelCurrent -->
+
+      <!-- ── TAB 2: DAILY FORECAST ── -->
+      <div class="ig-panel" id="igPanelDaily">
+        <div class="ig-daily-header">
+          <div class="ig-daily-location">
+            <i class="fas fa-location-dot"></i>
+            <span id="igDailyCity">--</span>
+          </div>
+          <span class="ig-daily-label">24-Hour Forecast</span>
+        </div>
+        <div class="ig-daily-cards" id="igDailyCards">
+          <!-- filled by JS -->
+        </div>
+        <!-- Temperature Graph -->
+        <div class="ig-temp-graph-wrap">
+          <div class="ig-graph-title"><i class="fas fa-chart-line"></i> Temperature Trend</div>
+          <div class="ig-graph-area">
+            <canvas id="igTempCanvas" class="ig-temp-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TAB 3: WEEKLY OUTLOOK ── -->
+      <div class="ig-panel" id="igPanelWeekly">
+        <div class="ig-weekly-header">
+          <div class="ig-weekly-location">
+            <i class="fas fa-calendar-week"></i>
+            <span>5-Day Weekly Outlook</span>
+          </div>
+          <span class="ig-weekly-city" id="igWeeklyCity">--</span>
+        </div>
+        <div class="ig-weekly-rows" id="igWeeklyRows">
+          <!-- filled by JS -->
+        </div>
+        <!-- Condition Summary -->
+        <div class="ig-condition-chips" id="igConditionChips"></div>
+      </div>
+
+    </div><!-- end infographic-overlay -->
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>Powered by <a href="https://openweathermap.org" target="_blank">OpenWeatherMap</a> &nbsp;|&nbsp; Built with ❤️ by WeatherVerse</p>
+    </footer>
+
+  </div><!-- end app-wrapper -->
+
+  <script src="app.js"></script>
+</body>
+</html>
